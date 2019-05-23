@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="QCAR_Dataset_config.xsd">
+  <TargetSet version="5.0" toolVersion="4.2.0">
+    <ObjectTarget bbox="0.0000 0.0000 0.0000 0.1425 0.0950 0.0950" captureAppVersion="6.5.0" lastSaved="2019-04-04 13:55:04" name="Cozmo_3D" targetId="0a4e442fafe64915aa0fdb36f8e1a573" version="2.0" />
+    <ObjectTarget bbox="0.0000 0.0000 0.0000 0.1425 0.0950 0.0950" captureAppVersion="6.5.0" lastSaved="2019-04-02 14:31:15" name="qr_for_cozmo" targetId="7e9c7fedb88e45c5a6c2fa037a8be502" version="2.0" />
+  </TargetSet>
+</QCARInfo>
