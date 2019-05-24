@@ -17,8 +17,8 @@ public class WebRequest : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        PostRequest("http://localhost:5000/"); 
-
+        PostRequest("http://localhost:5000/", "W");
+        PostRequest("http://localhost:5000/", "X");
     }
 
 	//IEnumerator GetRequest(string uri)
@@ -38,12 +38,12 @@ public class WebRequest : MonoBehaviour {
     //        }
     //    }
     //}
-    IEnumerator PostRequest(string uri)
+    IEnumerator PostRequest(string uri, string data)
     {
         //string to_post = "Patience is a virtue\n";
 
         Dictionary<string, string> to_post = new Dictionary<string, string>();
-        to_post.Add("message", "Patience is a virtue\n"); 
+        to_post.Add("message", data);
 
         using (UnityWebRequest WebRequest_out = UnityWebRequest.Post(uri, to_post))
         {

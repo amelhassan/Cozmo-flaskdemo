@@ -128,6 +128,8 @@ class RemoteControlCozmo:
             self.turn_left = is_key_down
         elif key_code == ord('D'):
             self.turn_right = is_key_down
+        elif key_code == ord('X'):
+        	is_key_down = False
         else:
             if not speed_changed:
                 update_driving = False
@@ -209,8 +211,10 @@ def to_js_bool_string(bool_value):
     return "true" if bool_value else "false"
 
 
-@flask_app.route("/")
+@flask_app.route("/", methods = ['POST'])
 def handle_index_page():
+    # if request.method == 'POST':
+    # 	handle_key_event(request, True)
     return '''
     <html>
         <head>
@@ -510,10 +514,13 @@ def handle_cozmoImage():
     return flask_helpers.stream_video(streaming_video, request.url_root)
 
 def handle_key_event(key_request, is_key_down):
-    message = json.loads(key_request.data.decode("utf-8"))
+    # TO DO: what is the form/data going to be when it comes in from Unity??
+    # Should it be one request at a time or a set of x number of key strokes? 
+    # How can we make it continuous?? 
+    message = key_request.form['message']
     if remote_control_cozmo:
-        remote_control_cozmo.handle_key(key_code=(message['keyCode']), is_shift_down=message['hasShift'],
-                                        is_ctrl_down=message['hasCtrl'], is_alt_down=message['hasAlt'],
+        remote_control_cozmo.handle_key(key_code=message, is_shift_down=False,
+                                        is_ctrl_down=False, is_alt_down=False,
                                         is_key_down=is_key_down)
     return ""
 
