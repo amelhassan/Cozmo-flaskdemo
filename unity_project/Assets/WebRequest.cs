@@ -8,17 +8,15 @@ public class WebRequest : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		// A correct website page -> call function below
-      //  StartCoroutine(GetRequest("https://ar-education.herokuapp.com"));
-          StartCoroutine(PostRequest("http://localhost:5000/")); 
-
-
+        // A correct website page -> call function below
+        //  StartCoroutine(GetRequest("https://ar-education.herokuapp.com"));
+        StartCoroutine(PostRequest("http://localhost:5000/", "W")); 
+       // PostRequest("http://localhost:5000/", "W");
     }
 	
 	// Update is called once per frame
-	void Update () {
-        PostRequest("http://localhost:5000/", "W");
-        PostRequest("http://localhost:5000/", "X");
+	void Update () { 
+        StartCoroutine(PostRequest("http://localhost:5000/", "X"));
     }
 
 	//IEnumerator GetRequest(string uri)

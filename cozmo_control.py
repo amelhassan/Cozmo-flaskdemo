@@ -105,6 +105,8 @@ class RemoteControlCozmo:
 
 
     def handle_key(self, key_code, is_shift_down, is_ctrl_down, is_alt_down, is_key_down):
+        print('In handle_key\n')
+        print('Key code is: ', key_code, '\n')
         '''Called on any key press or release
            Holding a key down may result in repeated handle_key calls with is_key_down==True
         '''
@@ -120,16 +122,20 @@ class RemoteControlCozmo:
 
         # Update state of driving intent from keyboard, and if anything changed then call update_driving
         update_driving = True
-        if key_code == ord('W'):
+        if key_code == 'X':
+            is_key_down = False
+            self.drive_forwards = False
+            self.drive_back = False
+            self.turn_left = False
+            self.turn_right = False
+        elif key_code == 'W':
             self.drive_forwards = is_key_down
-        elif key_code == ord('S'):
+        elif key_code == 'S':
             self.drive_back = is_key_down
-        elif key_code == ord('A'):
+        elif key_code == 'A':
             self.turn_left = is_key_down
-        elif key_code == ord('D'):
-            self.turn_right = is_key_down
-        elif key_code == ord('X'):
-        	is_key_down = False
+        elif key_code == 'D':
+            self.turn_right = is_key_down            
         else:
             if not speed_changed:
                 update_driving = False
@@ -147,6 +153,8 @@ class RemoteControlCozmo:
                 self.play_animation(anim_name)
             elif key_code == ord(' '):
                 self.say_text(self.text_to_say)
+
+        # handle_index_page()
 
 
     def queue_action(self, new_action):
@@ -181,6 +189,7 @@ class RemoteControlCozmo:
 
     
     def update_mouse_driving(self):
+        print('in update_mouse_driving\n')
         drive_dir = (self.drive_forwards - self.drive_back)
 
         if (drive_dir > 0.1) and self.cozmo.is_on_charger:
@@ -205,266 +214,15 @@ class RemoteControlCozmo:
 
         self.cozmo.drive_wheels(l_wheel_speed, r_wheel_speed, l_wheel_speed*4, r_wheel_speed*4 )
 
-
-
-def to_js_bool_string(bool_value):
-    return "true" if bool_value else "false"
-
-
-@flask_app.route("/", methods = ['POST'])
+@flask_app.route("/", methods = ['GET', 'POST'])
 def handle_index_page():
-    # if request.method == 'POST':
-    # 	handle_key_event(request, True)
-    return '''
-    <html>
-        <head>
-            <title>remote_control_cozmo.py display</title>
-        </head>
-        <body>
-            <h1>Remote Control Cozmo</h1>
-            <table>
-                    <td valign = top>
-                        <div id="cozmoImageMicrosoftWarning" style="display: none;color: #ff9900; text-align: center;">Video feed performance is better in Chrome or Firefox due to mjpeg limitations in this browser</div>
-                        <img src="cozmoImage" id="cozmoImageId" width=640 height=480>
-                        <div id="DebugInfoId"></div>
-                    </td>
-                    <td width=30></td>
-                    <td valign=top>
-                        <h2>Controls:</h2>
-
-
-                        <b>W A S D</b> : Drive Forwards / Left / Back / Right<br><br>
-
-                        <div style="display: none;">
-                        <b>Q</b> : Toggle Mouse Look: <button id="mouseLookId" onClick=onMouseLookButtonClicked(this) style="font-size: 14px">Default</button><br>
-                        </div>
-
-                        <b>Shift</b> : Hold to Move Faster <br>
-                        <b>Alt</b> : Hold to Move Slower <br>
-                        <div style="display: none;">
-                        <b>L</b> : Toggle IR Headlight: <button id="headlightId" onClick=onHeadlightButtonClicked(this) style="font-size: 14px">Default</button><br>
-                        <b>O</b> : Toggle Debug Annotations: <button id="debugAnnotationsId" onClick=onDebugAnnotationsButtonClicked(this) style="font-size: 14px">Default</button><br>
-                        <b>P</b> : Toggle Free Play mode: <button id="freeplayId" onClick=onFreeplayButtonClicked(this) style="font-size: 14px">Default</button><br>
-                        <b>Y</b> : Toggle Device Gyro mode: <button id="deviceGyroId" onClick=onDeviceGyroButtonClicked(this) style="font-size: 14px">Default</button><br>
-                        </div>
-                    </td>
-            </table>
-
-            <script type="text/javascript">
-                var gLastClientX = -1
-                var gLastClientY = -1
-                var gIsMouseLookEnabled = '''+ to_js_bool_string(_is_mouse_look_enabled_by_default) + '''
-                var gAreDebugAnnotationsEnabled = '''+ str(_display_debug_annotations) + '''
-                var gIsHeadlightEnabled = false
-                var gIsFreeplayEnabled = false
-                var gIsDeviceGyroEnabled = false
-                var gUserAgent = window.navigator.userAgent;
-                var gIsMicrosoftBrowser = gUserAgent.indexOf('MSIE ') > 0 || gUserAgent.indexOf('Trident/') > 0 || gUserAgent.indexOf('Edge/') > 0;
-                var gSkipFrame = false;
-
-                if (gIsMicrosoftBrowser) {
-                    document.getElementById("cozmoImageMicrosoftWarning").style.display = "block";
-                }
-
-                function postHttpRequest(url, dataSet)
-                {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", url, true);
-                    xhr.send( JSON.stringify( dataSet ) );
-                }
-
-                function updateCozmo()
-                {
-                    if (gIsMicrosoftBrowser && !gSkipFrame) {
-                        // IE doesn't support MJPEG, so we need to ping the server for more images.
-                        // Though, if this happens too frequently, the controls will be unresponsive.
-                        gSkipFrame = true;
-                        document.getElementById("cozmoImageId").src="cozmoImage?" + (new Date()).getTime();
-                    } else if (gSkipFrame) {
-                        gSkipFrame = false;
-                    }
-                    var xhr = new XMLHttpRequest();
-                    xhr.onreadystatechange = function() {
-                        if (xhr.readyState == XMLHttpRequest.DONE) {
-                            document.getElementById("DebugInfoId").innerHTML = xhr.responseText
-                        }
-                    }
-
-                    xhr.open("POST", "updateCozmo", true);
-                    xhr.send( null );
-                    setTimeout(updateCozmo , 60);
-                }
-                setTimeout(updateCozmo , 60);
-
-                function updateButtonEnabledText(button, isEnabled)
-                {
-                    button.firstChild.data = isEnabled ? "Enabled" : "Disabled";
-                }
-
-                function onMouseLookButtonClicked(button)
-                {
-                    gIsMouseLookEnabled = !gIsMouseLookEnabled;
-                    updateButtonEnabledText(button, gIsMouseLookEnabled);
-                    isMouseLookEnabled = gIsMouseLookEnabled
-                    postHttpRequest("setMouseLookEnabled", {isMouseLookEnabled})
-                }
-
-                function updateDebugAnnotationButtonEnabledText(button, isEnabled)
-                {
-                    switch(gAreDebugAnnotationsEnabled)
-                    {
-                    case 0:
-                        button.firstChild.data = "Disabled";
-                        break;
-                    case 1:
-                        button.firstChild.data = "Enabled (vision)";
-                        break;
-                    case 2:
-                        button.firstChild.data = "Enabled (all)";
-                        break;
-                    default:
-                        button.firstChild.data = "ERROR";
-                        break;
-                    }
-                }
-
-                function onDebugAnnotationsButtonClicked(button)
-                {
-                    gAreDebugAnnotationsEnabled += 1;
-                    if (gAreDebugAnnotationsEnabled > 2)
-                    {
-                        gAreDebugAnnotationsEnabled = 0
-                    }
-
-                    updateDebugAnnotationButtonEnabledText(button, gAreDebugAnnotationsEnabled)
-
-                    areDebugAnnotationsEnabled = gAreDebugAnnotationsEnabled
-                    postHttpRequest("setAreDebugAnnotationsEnabled", {areDebugAnnotationsEnabled})
-                }
-
-                function onHeadlightButtonClicked(button)
-                {
-                    gIsHeadlightEnabled = !gIsHeadlightEnabled;
-                    updateButtonEnabledText(button, gIsHeadlightEnabled);
-                    isHeadlightEnabled = gIsHeadlightEnabled
-                    postHttpRequest("setHeadlightEnabled", {isHeadlightEnabled})
-                }
-
-                function onFreeplayButtonClicked(button)
-                {
-                    gIsFreeplayEnabled = !gIsFreeplayEnabled;
-                    updateButtonEnabledText(button, gIsFreeplayEnabled);
-                    isFreeplayEnabled = gIsFreeplayEnabled
-                    postHttpRequest("setFreeplayEnabled", {isFreeplayEnabled})
-                }
-
-                function onDeviceGyroButtonClicked(button)
-                {
-                    gIsDeviceGyroEnabled = !gIsDeviceGyroEnabled;
-                    updateButtonEnabledText(button, gIsDeviceGyroEnabled);
-                    isDeviceGyroEnabled = gIsDeviceGyroEnabled
-                    postHttpRequest("setDeviceGyroEnabled", {isDeviceGyroEnabled})
-                }
-
-                updateButtonEnabledText(document.getElementById("mouseLookId"), gIsMouseLookEnabled);
-                updateButtonEnabledText(document.getElementById("headlightId"), gIsHeadlightEnabled);
-                updateDebugAnnotationButtonEnabledText(document.getElementById("debugAnnotationsId"), gAreDebugAnnotationsEnabled);
-                updateButtonEnabledText(document.getElementById("freeplayId"), gIsFreeplayEnabled);
-                updateButtonEnabledText(document.getElementById("deviceGyroId"), gIsDeviceGyroEnabled);
-
-                function handleDropDownSelect(selectObject)
-                {
-                    selectedIndex = selectObject.selectedIndex
-                    itemName = selectObject.name
-                    postHttpRequest("dropDownSelect", {selectedIndex, itemName});
-                }
-
-                function handleKeyActivity (e, actionType)
-                {
-                    var keyCode  = (e.keyCode ? e.keyCode : e.which);
-                    var hasShift = (e.shiftKey ? 1 : 0)
-                    var hasCtrl  = (e.ctrlKey  ? 1 : 0)
-                    var hasAlt   = (e.altKey   ? 1 : 0)
-
-                    if (actionType=="keyup")
-                    {
-                        if (keyCode == 76) // 'L'
-                        {
-                            // Simulate a click of the headlight button
-                            onHeadlightButtonClicked(document.getElementById("headlightId"))
-                        }
-                        else if (keyCode == 79) // 'O'
-                        {
-                            // Simulate a click of the debug annotations button
-                            onDebugAnnotationsButtonClicked(document.getElementById("debugAnnotationsId"))
-                        }
-                        else if (keyCode == 80) // 'P'
-                        {
-                            // Simulate a click of the debug annotations button
-                            onFreeplayButtonClicked(document.getElementById("freeplayId"))
-                        }
-                        else if (keyCode == 81) // 'Q'
-                        {
-                            // Simulate a click of the mouse look button
-                            onMouseLookButtonClicked(document.getElementById("mouseLookId"))
-                        }
-                        else if (keyCode == 89) // 'Y'
-                        {
-                            // Simulate a click of the device gyro button
-                            onDeviceGyroButtonClicked(document.getElementById("deviceGyroId"))
-                        }
-                    }
-
-                    postHttpRequest(actionType, {keyCode, hasShift, hasCtrl, hasAlt})
-                }
-
-                function handleMouseActivity (e, actionType)
-                {
-                    var clientX = e.clientX / document.body.clientWidth  // 0..1 (left..right)
-                    var clientY = e.clientY / document.body.clientHeight // 0..1 (top..bottom)
-                    var isButtonDown = e.which && (e.which != 0) ? 1 : 0
-                    var deltaX = (gLastClientX >= 0) ? (clientX - gLastClientX) : 0.0
-                    var deltaY = (gLastClientY >= 0) ? (clientY - gLastClientY) : 0.0
-                    gLastClientX = clientX
-                    gLastClientY = clientY
-
-                    postHttpRequest(actionType, {clientX, clientY, isButtonDown, deltaX, deltaY})
-                }
-
-                function handleTextInput(textField)
-                {
-                    textEntered = textField.value
-                    postHttpRequest("sayText", {textEntered})
-                }
-
-                document.addEventListener("keydown", function(e) { handleKeyActivity(e, "keydown") } );
-                document.addEventListener("keyup",   function(e) { handleKeyActivity(e, "keyup") } );
-
-                document.addEventListener("mousemove",   function(e) { handleMouseActivity(e, "mousemove") } );
-
-                function stopEventPropagation(event)
-                {
-                    if (event.stopPropagation)
-                    {
-                        event.stopPropagation();
-                    }
-                    else
-                    {
-                        event.cancelBubble = true
-                    }
-                }
-
-                document.getElementById("sayTextId").addEventListener("keydown", function(event) {
-                    stopEventPropagation(event);
-                } );
-                document.getElementById("sayTextId").addEventListener("keyup", function(event) {
-                    stopEventPropagation(event);
-                } );
-            </script>
-
-        </body>
-    </html>
-    '''
+    print('in handle_index_page\n')
+    printing = 'Waiting\n'
+    if request.method == 'POST':
+        print('FOUND A POST\n')
+        handle_key_event(request, True)
+        printing = 'Received\n'
+    return printing
 
 def get_annotated_image():
     image = remote_control_cozmo.cozmo.world.latest_image
@@ -473,25 +231,6 @@ def get_annotated_image():
     else:
         image = image.raw_image
     return image
-
-def streaming_video(url_root):
-    '''Video streaming generator function'''
-    try:
-        while True:
-            if remote_control_cozmo:
-                image = get_annotated_image()
-                # TODO: send to particle filter here
-
-                img_io = io.BytesIO()
-                image.save(img_io, 'PNG')
-                img_io.seek(0)
-                yield (b'--frame\r\n'
-                    b'Content-Type: image/png\r\n\r\n' + img_io.getvalue() + b'\r\n')
-            else:
-                asyncio.sleep(.1)
-    except cozmo.exceptions.SDKShutdown:
-        # Tell the main flask thread to shutdown
-        requests.post(url_root + 'shutdown')
 
 def serve_single_image():
     if remote_control_cozmo:
@@ -517,6 +256,7 @@ def handle_key_event(key_request, is_key_down):
     # TO DO: what is the form/data going to be when it comes in from Unity??
     # Should it be one request at a time or a set of x number of key strokes? 
     # How can we make it continuous?? 
+    print('In handle_key_event\n')
     message = key_request.form['message']
     if remote_control_cozmo:
         remote_control_cozmo.handle_key(key_code=message, is_shift_down=False,
@@ -529,51 +269,16 @@ def shutdown():
     flask_helpers.shutdown_flask(request)
     return ""
 
-
-@flask_app.route('/setAreDebugAnnotationsEnabled', methods=['POST'])
-def handle_setAreDebugAnnotationsEnabled():
-    '''Called from Javascript whenever debug-annotations mode is toggled'''
-    message = json.loads(request.data.decode("utf-8"))
-    global _display_debug_annotations
-    _display_debug_annotations = message['areDebugAnnotationsEnabled']
-    if remote_control_cozmo:
-        if _display_debug_annotations == DEBUG_ANNOTATIONS_ENABLED_ALL:
-            remote_control_cozmo.cozmo.world.image_annotator.enable_annotator('robotState')
-        else:
-            remote_control_cozmo.cozmo.world.image_annotator.disable_annotator('robotState')
-    return ""
-
-
-@flask_app.route('/keydown', methods=['POST'])
-def handle_keydown():
-    '''Called from Javascript whenever a key is down (note: can generate repeat calls if held down)'''
-    return handle_key_event(request, is_key_down=True)
-
-
-@flask_app.route('/keyup', methods=['POST'])
-def handle_keyup():
-    '''Called from Javascript whenever a key is released'''
-    return handle_key_event(request, is_key_down=False)
-
 @flask_app.route('/updateCozmo', methods=['POST'])
 def handle_updateCozmo():
     if remote_control_cozmo:
         remote_control_cozmo.update()
     return ""
 
-# def get_in_position(robot: cozmo.robot.Robot):
-#     lift_action = robot.set_lift_height(1.0, in_parallel=True)
-#     head_action = robot.set_head_angle(cozmo.robot.MIN_HEAD_ANGLE,
-#                                        in_parallel=True)
-#     lift_action.wait_for_completed()
-#     head_action.wait_for_completed()
-
 def run(sdk_conn):
     robot = sdk_conn.wait_for_robot()
     robot.world.image_annotator.add_annotator('robotState', RobotStateDisplay)
     robot.enable_device_imu(True, True, True)
-
-    # get_in_position(robot)
 
     global remote_control_cozmo
     remote_control_cozmo = RemoteControlCozmo(robot)
@@ -588,6 +293,7 @@ if __name__ == '__main__':
     cozmo.setup_basic_logging()
     cozmo.robot.Robot.drive_off_charger_on_connect = False  # RC can drive off charger if required
     try:
+        print('In the try\n')
         cozmo.connect(run)
     except KeyboardInterrupt as e:
         pass
