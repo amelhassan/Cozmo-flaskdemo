@@ -61,5 +61,10 @@ public static class OpenSourceInitializer
         {
             go.AddComponent<DefaultInitializationErrorHandler>();
         }
+
+        public void AddDefaultModelRecoEventHandler(GameObject go)
+        {
+            return; 
+        }
     }
 }

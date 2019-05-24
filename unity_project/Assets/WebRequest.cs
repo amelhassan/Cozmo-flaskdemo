@@ -9,29 +9,59 @@ public class WebRequest : MonoBehaviour {
 	void Start () {
 
 		// A correct website page -> call function below
-        StartCoroutine(GetRequest("https://ar-education.herokuapp.com"));
+      //  StartCoroutine(GetRequest("https://ar-education.herokuapp.com"));
+          StartCoroutine(PostRequest("http://localhost:5000/")); 
 
-	}
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
-	}
+        PostRequest("http://localhost:5000/"); 
 
-	IEnumerator GetRequest(string uri)
+    }
+
+	//IEnumerator GetRequest(string uri)
+    //{
+    //    using (UnityWebRequest WebRequest_ins = UnityWebRequest.Get(uri))
+    //    {
+    //        // Request and wait for the desired page.
+    //        yield return WebRequest_ins.SendWebRequest();
+
+    //        if (WebRequest_ins.isNetworkError)
+    //        {
+    //            Debug.Log(": Error: " + WebRequest_ins.error);
+    //        }
+    //        else
+    //        {
+    //            Debug.Log(":\nReceived: " + WebRequest_ins.downloadHandler.text);
+    //        }
+    //    }
+    //}
+    IEnumerator PostRequest(string uri)
     {
-        using (UnityWebRequest WebRequest_ins = UnityWebRequest.Get(uri))
-        {
-            // Request and wait for the desired page.
-            yield return WebRequest_ins.SendWebRequest();
+        //string to_post = "Patience is a virtue\n";
 
-            if (WebRequest_ins.isNetworkError)
+        Dictionary<string, string> to_post = new Dictionary<string, string>();
+        to_post.Add("message", "Patience is a virtue\n"); 
+
+        using (UnityWebRequest WebRequest_out = UnityWebRequest.Post(uri, to_post))
+        {
+            // One website suggested adding this but it didn't seem to do anything? 
+            // I'm leaving it here in case it could be helpful in the future
+            // WebRequest_out.chunkedTransfer = false;
+
+            yield return WebRequest_out.SendWebRequest();
+
+            if (WebRequest_out.isNetworkError || WebRequest_out.isHttpError)
             {
-                Debug.Log(": Error: " + WebRequest_ins.error);
+                Debug.Log(": Error: " + WebRequest_out.error);
             }
             else
             {
-                Debug.Log(":\nReceived: " + WebRequest_ins.downloadHandler.text);
+                Debug.Log(":\nPrinted: " + WebRequest_out.downloadHandler.text);
             }
         }
     }
+
 }
