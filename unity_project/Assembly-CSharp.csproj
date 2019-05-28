@@ -62,7 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\ButtonsClicking.cs" />
+    <Compile Include="Assets\ButtonControl.cs" />
     <Compile Include="Assets\projector_rand.cs" />
     <Compile Include="Assets\Scripts\qrstatus.cs" />
     <Compile Include="Assets\Scripts\qrTrackableEventHandler.cs" />

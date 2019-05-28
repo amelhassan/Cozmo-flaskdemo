@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI; 
 
 public class WebRequest : MonoBehaviour {
 
@@ -11,14 +12,39 @@ public class WebRequest : MonoBehaviour {
         // A correct website page -> call function below
         //  StartCoroutine(GetRequest("https://ar-education.herokuapp.com"));
         Debug.Log("In Start\n"); 
-        StartCoroutine(PostRequest("http://localhost:5000/", "S")); 
+        StartCoroutine(Pause("X")); 
        // PostRequest("http://localhost:5000/", "W");
     }
 	
-	// Update is called once per frame
-	void Update () {
-        Debug.Log("In update\n"); 
-        StartCoroutine(Pause("X"));
+    public void NextCommand(string buttonA)
+    {
+        if (buttonA == "Forwards")
+        {
+            StartCoroutine(Pause("W"));
+        }
+        else if (buttonA == "Backwards")
+        {
+            StartCoroutine(Pause("S"));
+        }
+        else if (buttonA == "LeftTurn")
+        {
+            StartCoroutine(Pause("A"));
+        }
+        else
+        {
+            StartCoroutine(Pause("D"));
+        }
+
+        //StartCoroutine(Pause("X"));
+    }
+
+
+    // QUESTION: MAYBE LEAVE THIS EMPTY BECAUSE IT'S TOO FAST FOR THE ROBOT AND
+    //          JUST USE A PUBLIC FUNCTION THAT IS CALLED WHEN SOMEONE CLICKS 
+    // Update is called once per frame
+    void Update () {
+       // Debug.Log("In update\n"); 
+       // StartCoroutine(Pause("X"));
         //Debug.Log("After first stop\n"); 
         //Pause("W");
         //Debug.Log("After second go\n"); 
