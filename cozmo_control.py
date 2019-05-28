@@ -144,19 +144,7 @@ class RemoteControlCozmo:
         # Update driving, head and lift as appropriate
         if update_driving:
             self.update_mouse_driving()
-
-
-        # Handle any keys being released (e.g. the end of a key-click)
-        if not is_key_down:
-            if (key_code >= ord('0')) and (key_code <= ord('9')):
-                anim_name = self.key_code_to_anim_name(key_code)
-                self.play_animation(anim_name)
-            elif key_code == ord(' '):
-                self.say_text(self.text_to_say)
-
-        # handle_index_page()
-
-
+            
     def queue_action(self, new_action):
         if len(self.action_queue) > 10:
             self.action_queue.pop(0)
@@ -217,12 +205,14 @@ class RemoteControlCozmo:
 @flask_app.route("/", methods = ['GET', 'POST'])
 def handle_index_page():
     print('in handle_index_page\n')
+    # while True: 
     printing = 'Waiting\n'
     if request.method == 'POST':
         print('FOUND A POST\n')
         handle_key_event(request, True)
         printing = 'Received\n'
     return printing
+    
 
 def get_annotated_image():
     image = remote_control_cozmo.cozmo.world.latest_image
@@ -276,6 +266,7 @@ def handle_updateCozmo():
     return ""
 
 def run(sdk_conn):
+    print('in run\n')
     robot = sdk_conn.wait_for_robot()
     robot.world.image_annotator.add_annotator('robotState', RobotStateDisplay)
     robot.enable_device_imu(True, True, True)

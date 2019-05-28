@@ -10,16 +10,35 @@ public class WebRequest : MonoBehaviour {
 
         // A correct website page -> call function below
         //  StartCoroutine(GetRequest("https://ar-education.herokuapp.com"));
-        StartCoroutine(PostRequest("http://localhost:5000/", "W")); 
+        Debug.Log("In Start\n"); 
+        StartCoroutine(PostRequest("http://localhost:5000/", "S")); 
        // PostRequest("http://localhost:5000/", "W");
     }
 	
 	// Update is called once per frame
-	void Update () { 
-        StartCoroutine(PostRequest("http://localhost:5000/", "X"));
+	void Update () {
+        Debug.Log("In update\n"); 
+        StartCoroutine(Pause("X"));
+        //Debug.Log("After first stop\n"); 
+        //Pause("W");
+        //Debug.Log("After second go\n"); 
+        //Pause("X");
+        //Debug.Log("After second stop\n"); 
+       // StartCoroutine(PostRequest("http://localhost:5000/", "X"));
     }
 
-	//IEnumerator GetRequest(string uri)
+    IEnumerator Pause(string command)
+    {
+        //for(; ; )
+        //{
+        Debug.Log("WAIIITTT\n");
+        yield return new WaitForSeconds(3);
+        StartCoroutine(PostRequest("http://localhost:5000/", command));
+            
+        //}
+    }
+
+    //IEnumerator GetRequest(string uri)
     //{
     //    using (UnityWebRequest WebRequest_ins = UnityWebRequest.Get(uri))
     //    {
